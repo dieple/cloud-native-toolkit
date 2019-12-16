@@ -2,8 +2,8 @@
 
 To build the base image:
 ```
-$> docker build -t dieple/builder_tools -t dieple/builder_tools:latest .
-$> docker push dieple/builder_tools
+$> docker build -t dieple/cloud-native-toolkit -t dieple/cloud-native-toolkit:latest .
+$> docker push dieple/cloud-native-toolkit
 ```
 
 ## Tidy up
