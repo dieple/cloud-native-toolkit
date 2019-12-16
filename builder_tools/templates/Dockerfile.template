@@ -5,7 +5,7 @@
 # by setup.py. All modifications should be done in
 # templates/Dockerfile.template
 #################################################################
-FROM dieple/builder_tools:latest
+FROM dieple/cloud-native-toolkit:latest
 
 #ARG profile
 ARG terraformVersion
