@@ -1,0 +1,129 @@
+#################################################################
+# CloudOps IaC Local Development Environment
+#
+# Please do not modify the Dockerfile manually as it generate
+# by setup.py. All modifications should be done in
+# templates/Dockerfile.template
+#################################################################
+FROM dieple/builder_tools:latest
+
+#ARG profile
+ARG terraformVersion
+ARG flyCLIVersion
+ARG dockerAppUser
+ARG sshKeyPassphrase
+
+# Warning: It is not recommended to use build-time variables for passing secrets like github
+# keys, user credentials etc. 
+# Build-time variable values are visible to any user of the image with the docker 
+# history command. 
+# Since I'm using this for my personal local development env so should be OK.
+ARG sshKey
+ARG sshKeyPub
+
+#ENV TERM=xterm-256color
+
+# Set this environment variable to true to set timezone on container start.
+ENV SET_CONTAINER_TIMEZONE false
+
+# Default container timezone as found under the directory /usr/share/zoneinfo/.
+ENV CONTAINER_TIMEZONE Europe/London
+
+# set the zsh theme
+ENV ZSH_THEME agnoster
+
+###INSTALL_TERRAFORM###RUN curl -sL -o $HOME/terraform.zip \
+    "https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip" && \
+    unzip $HOME/terraform.zip -d /usr/local/bin && rm -rf $HOME/terraform.zip
+
+
+RUN echo "root:${dockerAppUser}" |chpasswd \
+    && useradd -ms /bin/zsh ${dockerAppUser} \
+    && echo "${dockerAppUser}:${dockerAppUser}" |chpasswd \
+    && adduser "${dockerAppUser}" sudo
+
+
+VOLUME ["/repos"]
+
+#ADD api-server.py /scripts
+RUN mkdir -p /scripts
+COPY ./builder_tools/scripts/packages /scripts/packages
+ADD pip_packages /scripts/packages/
+ADD ./builder_tools/scripts/kms_encrypt.py "/scripts"
+ADD ./builder_tools/scripts/kms_decrypt.py "/scripts"
+#ADD ./builder_tools/scripts/assume-role.sh "/scripts"
+ADD ./builder_tools/scripts/ntp.sh "/scripts"
+RUN /scripts/ntp.sh && \
+    chown -R "${dockerAppUser}:${dockerAppUser}" /scripts
+
+WORKDIR /scripts/packages
+
+RUN pip install setuptools && \
+	pip freeze && \
+	pip install git+https://github.com/virtuald/pyhcl.git@0.3.12#egg=pyhcl && \
+	pip install -r pip_packages && \
+	pip install ./secrets && \
+	pip install ./render-templates && \
+	pip install ./pgbackup && \
+    rm -rf $HOME/.cache && \
+    mkdir -p "/home/${dockerAppUser}/.ssh" &&  \
+    chmod 0700 "/home/${dockerAppUser}/.ssh" && \
+    chown -R "${dockerAppUser}:${dockerAppUser}" "/home/${dockerAppUser}/.ssh" && \
+    mkdir /home/${dockerAppUser}/bin && \
+    chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}/bin
+
+#RUN echo "$sshKey" > "/home/${dockerAppUser}/.ssh/id_rsa" && chmod 0600 "/home/${dockerAppUser}/.ssh/id_rsa"
+#RUN echo "$sshKeyPub" > "/home/${dockerAppUser}/.ssh/id_rsa.pub" && chmod 0644 "/home/${dockerAppUser}/.ssh/id_rsa.pub"
+
+# DataOps Snowflake Cloner tool.
+#COPY ./builder_tools/bin/sfcloner-linux-amd64-1.0.0 /home/${dockerAppUser}/bin
+#COPY ./builder_tools/bin/sfcloner /home/${dockerAppUser}/bin
+# This is required when create aws system user (for external S3 and CI/CD purpose)
+#COPY ./builder_tools/bin/dataops.gpg.pub.bin /scripts/dataops.gpg.pub.bin
+
+
+#RUN eval `ssh-agent -s` && \
+#    printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /home/${dockerAppUser}/.ssh/id_rsa
+
+USER ${dockerAppuser}
+
+ADD ./builder_tools/templates/vimrc "/home/${dockerAppUser}/.vimrc"
+
+RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo 'alias k=kubectl' | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo 'alias k9s="export TERM=xterm && k9s"' | tee -a "/home/${dockerAppUser}/.zshrc"
+
+RUN curl --silent --location "https://get.pulumi.com/releases/sdk/pulumi-v1.5.2-linux-x64.tar.gz" | tar xz -C /tmp && \
+    mv /tmp/pulumi "/home/${dockerAppUser}/bin/" && \
+    chmod -R 755 "/home/${dockerAppUser}/bin/"
+
+
+# Set the vault profile in the environment for assume-role scripts.
+#ENV VAULT_PROFILE=$profile
+
+# Setup TERM and PS1
+#ENV TERM=xterm-color
+#RUN echo '#override PS1' | tee -a "/home/${dockerAppUser}/.bashrc"
+#RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/${dockerAppUser}/.bashrc"
+
+# Add to PATH variable.
+RUN echo 'export PATH=$PATH:/scripts:~/bin' | tee -a "/home/${dockerAppUser}/.zshrc"
+RUN echo 'export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"' | tee -a "/home/${dockerAppUser}/.zshrc"
+RUN echo 'ZSH_THEME="agnoster"' | tee -a "/home/${dockerAppUser}/.zshrc"
+
+#EXPOSE 5000
+WORKDIR /repos
+
+RUN echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
+
+ADD entry.sh /scripts/
+ENTRYPOINT ["/scripts/entry.sh"]
+
+# run the installation script
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+
+# installing “agnoster” Oh My ZSH theme
+#RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && su - ${dockerAppUser} -c ./install.sh
+
+#CMD  python /scripts/api-server.py /repos
+CMD ["zsh"]
