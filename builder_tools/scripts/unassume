@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+ 
+unassume(){
+    unset AWS_SESSION_START
+    unset AWS_SESSION_ACCESS_KEY_ID
+    unset AWS_SESSION_SECRET_ACCESS_KEY
+    unset AWS_SESSION_SESSION_TOKEN
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
+    unset AWS_SESSION_TOKEN
+    unset AWS_REGION
+    unset AWS_DEFAULT_REGION
+    unset AWS_ACCOUNT_ID
+    unset AWS_ACCOUNT_NAME
+    unset AWS_ACCOUNT_ROLE
+    unset GEO_ENV
+}

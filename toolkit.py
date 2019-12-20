@@ -31,11 +31,13 @@ log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(me
 log_handler.setFormatter(log_formatter)
 logger.addHandler(log_handler)
 
-output_dockerfile = "./Dockerfile"
 input_dockerfile = "./builder_tools/templates/Dockerfile.template"
-docker_entry_file = "./entry.sh"
 input_pip_packages_file = "./builder_tools/templates/pip_packages.template"
+
+output_dockerfile = "./Dockerfile"
+entry_filename = "./entry.sh"
 output_pip_packages_file = "./pip_packages"
+
 terraform_text = "###INSTALL_TERRAFORM###"
 
 home_dir = expanduser("~")
@@ -45,8 +47,8 @@ def process_arguments():
     optional = parser._action_groups.pop()
     required = parser.add_argument_group('Required arguments')
 
-    gh_user = os.environ.get('GITHUB_USERNAME')
-    gh_email = os.environ.get('GITHUB_EMAIL')
+    # gh_user = os.environ.get('GITHUB_USERNAME')
+    # gh_email = os.environ.get('GITHUB_EMAIL')
 
     required.add_argument('--shareHostVolume',
                           help='Path where all development github repos are checked out. /home/<username>/repos',
@@ -65,15 +67,15 @@ def process_arguments():
     optional.add_argument("--kubeConfigDir", default="{0}/.kube".format(home_dir), help="Kubectl config directory")
     optional.add_argument("--sshKeyPassphrase", default="", help="ssh pass phrase")
 
-    if is_empty(gh_user):
-        gh_user = default_input("Env [GITHUB_USERNAME] not set - Enter github username", "dieple1")
+    # if is_empty(gh_user):
+    #     gh_user = default_input("Env [GITHUB_USERNAME] not set - Enter github username", "dieple1")
 
-    if is_empty(gh_email):
-        gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "dieple1@gmail.com")
+    # if is_empty(gh_email):
+    #     gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "dieple1@gmail.com")
 
-    print("DEBUG: gh_user {0}, gh_email {1}".format(gh_user, gh_email))
-    optional.add_argument('--githubUsername', help='Github username', default="{0}".format(gh_user))
-    optional.add_argument('--githubEmail', help='Github email', default="{0}".format(gh_email))
+    # print("DEBUG: gh_user {0}, gh_email {1}".format(gh_user, gh_email))
+    # optional.add_argument('--githubUsername', help='Github username', default="{0}".format(gh_user))
+    # optional.add_argument('--githubEmail', help='Github email', default="{0}".format(gh_email))
 
     # optional.add_argument("--installFlyCLI", type=str2bool, nargs='?', const=True, default=True, help="Install
     # Concourse Fly CLI?")
@@ -83,22 +85,26 @@ def process_arguments():
     # logger.info("args {0}".format(parser.parse_args()))
     return parser.parse_args()
 
-def create_docker_entry_file(entry_filename, args):
+def create_docker_entry_file(args, entry_filename):
     with open(entry_filename, 'w', newline='\n') as f:
-        gh_email = 'git config --global user.email "{0}"\n'.format(args.githubEmail)
-        gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
-
+        # gh_email = 'git config --global user.email "{0}"\n'.format(args.githubEmail)
+        # gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
         # assume_role = "set -x && . /scripts/assume-role.sh {0} reassume-role\n".format(args.profile)
-        exec_stmt = 'exec "$@"'
+
+        mvcat = "cat /home/{0}/.zshrc.pre-oh-my-zsh >> /home/{0}/.zshrc\n".format(args.dockerAppUser)
+
+        src = "source /home/{0}/.zshrc\n".format(args.dockerAppUser)
+        exec_stmt = 'exec "$@"\n'
 
         if "0.12" in args.terraformVersion:
             clone_repo = 'cd /tmp && git clone https://github.com/mjuenema/python-terrascript.git\n'
             install_terrascript = 'cd /tmp/python-terrascript && git checkout develop && make install && cd /repos\n'
 
         f.write('#!/bin/bash\n\n')
-        f.write('# Please do not modify this file manually as it generate by builder.py\n\n')
-        f.write(gh_email)
-        f.write(gh_user)
+        f.write('# Please do not modify this file manually as it generate by toolkit.py\n\n')
+        # f.write(gh_email)
+        # f.write(gh_user)
+        f.write("wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true\n")
 
         if "0.12" in args.terraformVersion:
             f.write(clone_repo)
@@ -109,6 +115,9 @@ def create_docker_entry_file(entry_filename, args):
         # f.write("helm repo update\n")
         # f.write("eval `ssh-agent -s`")
         # f.write("printf '${sshKeyPassphrase}\n' | ssh-add /home/${dockerAppUser}/.ssh/id_rsa")
+
+        f.write(mvcat)
+        f.write(src)
         f.write(exec_stmt)
 
     # make the entrypoint executable so that the docker image can run on startup
@@ -162,7 +171,7 @@ def build_docker_image(args, dockerfile):
     os.system(build_command)
 
 
-def run_docker_image(args, dockerfile):
+def run_docker_image(args):
 
     tf_cache_plugins_dir = "{0}/.terraform.d/plugin-cache".format(home_dir)
 
@@ -183,13 +192,18 @@ def run_docker_image(args, dockerfile):
 
 
 def main():
+
     args = process_arguments()
 
-    create_docker_entry_file("entry.sh", args)
+    # prerequites
+    # for dir in [".ssh", ".aws", ".kube", ".terraform.d/plugin-cache" ]:
+    #     os.system("mkdir -p /home/{0}/{1}".format(args.dockerAppUser, dir))
+
+    create_docker_entry_file(args, entry_filename)
     create_pip_packages_file(args, input_pip_packages_file, output_pip_packages_file)
     create_dockerfile_from_template(args, input_dockerfile, output_dockerfile)
     build_docker_image(args, output_dockerfile)
-    run_docker_image(args, output_dockerfile)
+    run_docker_image(args)
 
 
 if __name__ == '__main__':

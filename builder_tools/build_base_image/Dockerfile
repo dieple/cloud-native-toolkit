@@ -23,6 +23,7 @@ RUN set -ex && \
   apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pip \
                         python3-dev \
+                        python3-venv \
                         python-dbus \
                         ntp \
                         libglib2.0-dev \

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROFILE=$1
+PROFILE=${1:-toolkit}
 
 usage(){
 cat <<!

@@ -49,9 +49,6 @@ VOLUME ["/repos"]
 RUN mkdir -p /scripts
 COPY ./builder_tools/scripts/packages /scripts/packages
 ADD pip_packages /scripts/packages/
-ADD ./builder_tools/scripts/kms_encrypt.py "/scripts"
-ADD ./builder_tools/scripts/kms_decrypt.py "/scripts"
-#ADD ./builder_tools/scripts/assume-role.sh "/scripts"
 ADD ./builder_tools/scripts/ntp.sh "/scripts"
 RUN /scripts/ntp.sh && \
     chown -R "${dockerAppUser}:${dockerAppUser}" /scripts
@@ -69,8 +66,7 @@ RUN pip install setuptools && \
     mkdir -p "/home/${dockerAppUser}/.ssh" &&  \
     chmod 0700 "/home/${dockerAppUser}/.ssh" && \
     chown -R "${dockerAppUser}:${dockerAppUser}" "/home/${dockerAppUser}/.ssh" && \
-    mkdir /home/${dockerAppUser}/bin && \
-    chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}/bin
+    mkdir /home/${dockerAppUser}/bin
 
 #RUN echo "$sshKey" > "/home/${dockerAppUser}/.ssh/id_rsa" && chmod 0600 "/home/${dockerAppUser}/.ssh/id_rsa"
 #RUN echo "$sshKeyPub" > "/home/${dockerAppUser}/.ssh/id_rsa.pub" && chmod 0644 "/home/${dockerAppUser}/.ssh/id_rsa.pub"
@@ -81,6 +77,9 @@ RUN pip install setuptools && \
 # This is required when create aws system user (for external S3 and CI/CD purpose)
 #COPY ./builder_tools/bin/dataops.gpg.pub.bin /scripts/dataops.gpg.pub.bin
 
+ADD ./builder_tools/scripts/unassume /home/${dockerAppUser}/bin
+ADD ./builder_tools/scripts/kms_encrypt.py /home/${dockerAppUser}/bin
+ADD ./builder_tools/scripts/kms_decrypt.py /home/${dockerAppUser}/bin
 
 #RUN eval `ssh-agent -s` && \
 #    printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /home/${dockerAppUser}/.ssh/id_rsa
@@ -107,23 +106,28 @@ RUN curl --silent --location "https://get.pulumi.com/releases/sdk/pulumi-v1.5.2-
 #RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/${dockerAppUser}/.bashrc"
 
 # Add to PATH variable.
-RUN echo 'export PATH=$PATH:/scripts:~/bin' | tee -a "/home/${dockerAppUser}/.zshrc"
-RUN echo 'export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"' | tee -a "/home/${dockerAppUser}/.zshrc"
-RUN echo 'ZSH_THEME="agnoster"' | tee -a "/home/${dockerAppUser}/.zshrc"
+RUN echo "export PATH=$PATH:/scripts:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo "export TF_PLUGIN_CACHE_DIR=/home/${dockerAppUser}/.terraform.d/plugin-cache" | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo 'ZSH_THEME="agnoster"' | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo "export PATH=$PATH:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc" && \
+    echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
 
 #EXPOSE 5000
 WORKDIR /repos
 
-RUN echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
-
 ADD entry.sh /scripts/
-ENTRYPOINT ["/scripts/entry.sh"]
 
 # run the installation script
-RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+#RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
 
 # installing “agnoster” Oh My ZSH theme
 #RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && su - ${dockerAppUser} -c ./install.sh
 
+RUN chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}
+#RUN chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}/.terraform.d
+
+RUN ln -s /usr/bin/python3 /usr/local/bin/python3
+
 #CMD  python /scripts/api-server.py /repos
-CMD ["zsh"]
+#CMD ["zsh"]
+ENTRYPOINT ["/scripts/entry.sh"]
