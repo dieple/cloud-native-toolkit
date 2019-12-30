@@ -1,6 +1,6 @@
 ## Build and Push to Docker Hub
 
-To build the base imageand push to dockerhub
+To build the base image and push to dockerhub
 ```
 $> ./build_image.sh <dockerhub_userid> <image_tag_version>
 ```
