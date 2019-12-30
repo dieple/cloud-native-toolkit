@@ -42,7 +42,7 @@ The packages are build using pip install if possible, further addons can be incl
 * aws-vault on your host machine
 * Manually create file `$HOME/.aws/config` on your host machine with entries for the 
 AWS accounts you want to access - see below
-* Manually create `$HOME/.kube` directory for Kubernetes
+* Manually create `$HOME/{.kube, .aws, .terraform.d/plugin-cache, repos/golib, repos/go-workspace}` directory for external host volume links
 * Personal SSH keys created on your host machine and added to your GitHub settings (the ability to clone repos using SSH)  
 
 __`$HOME/.aws/config`__ 

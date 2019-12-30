@@ -1,9 +1,8 @@
 ## Build and Push to Docker Hub
 
-To build the base image:
+To build the base imageand push to dockerhub
 ```
-$> docker build -t dieple/cloud-native-toolkit -t dieple/cloud-native-toolkit:latest .
-$> docker push dieple/cloud-native-toolkit
+$> ./build_image.sh <dockerhub_userid> <image_tag_version>
 ```
 
 ## Tidy up

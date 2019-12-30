@@ -32,6 +32,8 @@ ENV CONTAINER_TIMEZONE Europe/London
 # set the zsh theme
 ENV ZSH_THEME agnoster
 
+ENV PATH /usr/local/bin/go/bin:$PATH
+
 ###INSTALL_TERRAFORM###RUN curl -sL -o $HOME/terraform.zip \
     "https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip" && \
     unzip $HOME/terraform.zip -d /usr/local/bin && rm -rf $HOME/terraform.zip
@@ -113,6 +115,10 @@ RUN echo "export PATH=$PATH:/scripts:/home/${dockerAppUser}/bin" | tee -a "/home
     echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
 
 #EXPOSE 5000
+ENV GOROOT /usr/local/bin/go
+ENV GOPATH /repos/golib
+ENV PATH $GOPATH/bin:$PATH:$GOROOT/bin
+ENV GOPATH $GOPATH:/repos/go-workspace
 WORKDIR /repos
 
 ADD entry.sh /scripts/

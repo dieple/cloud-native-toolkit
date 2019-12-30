@@ -1,10 +1,6 @@
-#################################################################
-# CloudOps IaC Local Development Environment
-#
-# Please do not modify the Dockerfile manually as it generate
-# by builder.py. All modifications should be done in
-# templates/Dockerfile.template
-#################################################################
+###############################################
+# Base image for local Development environment
+###############################################
 FROM ubuntu:18.04
 
 # Set this environment variable to true to set timezone on container start.
@@ -17,6 +13,9 @@ ENV TERM=xterm-color
 
 # set the zsh theme
 ENV ZSH_THEME agnoster
+
+ENV GOLANG_VERSION 1.13.5
+
 
 #bash-completion && \
 RUN set -ex && \
@@ -90,6 +89,7 @@ RUN curl -sL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/
     chmod +x /usr/local/bin/yaml2json && \
     curl -sL -o /usr/local/bin/jq  https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
     chmod +x /usr/local/bin/jq && \
+    curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz | tar -C /usr/local/bin -xz && \
     curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/local/bin/ && \
     curl -sL -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.12.6/bin/linux/amd64/kubectl && \
@@ -103,7 +103,7 @@ RUN curl -sL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/
     chmod +x /usr/local/bin/k9s && \
     curl -sL -o /usr/local/bin/assume-role https://raw.githubusercontent.com/coinbase/assume-role/master/assume-role && \
     chmod +x /usr/local/bin/assume-role && \
-    curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip && \
+    curl -sL -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip && \
     unzip 1password.zip -d /usr/local/bin && \
     rm 1password.zip && \
     rm -rf /root/.cache && rm -rf /tmp/*
