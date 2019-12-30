@@ -11,12 +11,14 @@ Within this repo you can perform Infrastructure as Code (IaC) using
 * Terraform
 * AWS CLI
 * coinbase/assume-role
+* etc...
 
 ## Why would I wanna use this?
 
 * Quick, easy and repeatable method to setup your local development environment.
 * Isolated from your host PC. Don't have to worry about software version conflicts with your host environment. 
 * Every developer using this tool will have the same version of software
+* No more issues of "It works on my environment but not yours"
 
 ## Software installed
 * Python3
@@ -28,6 +30,7 @@ Within this repo you can perform Infrastructure as Code (IaC) using
 * AWS Vault --> Profiles, MFA and roles switching capability
 * Kubectl
 * Helm
+* etc...
 
 The packages are build using pip install if possible, further addons can be included during docker image build stage.
 
@@ -47,12 +50,8 @@ AWS accounts you want to access - see below
 
 __`$HOME/.aws/config`__ 
 
-To get started with this file, either take the entries shown below 
-or use the sample file [here](./samples/aws-config.txt)
+To get started with this file, take the entries shown below 
 and edit to match your IAM user, MFA and account IDs  
-
-The sample file contains entries for DataOps AWS accounts.
-All you need to do is replace text, 'dieple', with your IAM user name.
 
 ```
 [default]
@@ -73,7 +72,7 @@ role_arn=arn:aws:iam::<switch-role-aws-account-id>:role/developers
 First, clone this repo:
 
 ```bash
-$> mkdir -p $HOME/repos
+$> mkdir -p $HOME/{.kube, .aws, .terraform.d/plugin-cache, repos/golib, repos/go-workspace}
 $> cd $HOME/repos
 $> git clone https://github.com/dieple/cloud-native-toolkit.git toolkit
 $> cd toolkit
