@@ -72,7 +72,7 @@ role_arn=arn:aws:iam::<switch-role-aws-account-id>:role/developers
 First, clone this repo:
 
 ```bash
-$> mkdir -p $HOME/{.kube, .aws, .terraform.d/plugin-cache, repos/golib, repos/go-workspace/src, repos/go-workspace/bin, repos/go-workspace/pkg}
+$> mkdir -p $HOME/{.kube, .aws, .terraform.d/plugin-cache, repos/golang/golib/src/, repos/golang/golib/bin, repos/golang/golib/pkg, repos/golang/go/src, repos/golang/go/bin, repos/golang/go/pkg}
 $> cd $HOME/repos
 $> git clone https://github.com/dieple/cloud-native-toolkit.git toolkit
 $> cd toolkit
@@ -81,8 +81,8 @@ $> ./run_toolkit.sh
 
 
 ### Assume Roles
-```bash
 
+```bash
 #$> eval $(assume-role <aws-account-alias> <role-to-assume> YOUR-MFA-CODE)
 $> eval $(assume-role dataops-staging administrator YOUR-MFA-CODE)
 ```
