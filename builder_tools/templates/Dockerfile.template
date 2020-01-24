@@ -14,9 +14,9 @@ ARG dockerAppUser
 ARG sshKeyPassphrase
 
 # Warning: It is not recommended to use build-time variables for passing secrets like github
-# keys, user credentials etc. 
-# Build-time variable values are visible to any user of the image with the docker 
-# history command. 
+# keys, user credentials etc.
+# Build-time variable values are visible to any user of the image with the docker
+# history command.
 # Since I'm using this for my personal local development env so should be OK.
 ARG sshKey
 ARG sshKeyPub
@@ -94,9 +94,9 @@ RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/${dockerAppUser}/.zs
     echo 'alias k=kubectl' | tee -a "/home/${dockerAppUser}/.zshrc" && \
     echo 'alias k9s="export TERM=xterm && k9s"' | tee -a "/home/${dockerAppUser}/.zshrc"
 
-RUN curl --silent --location "https://get.pulumi.com/releases/sdk/pulumi-v1.5.2-linux-x64.tar.gz" | tar xz -C /tmp && \
-    mv /tmp/pulumi "/home/${dockerAppUser}/bin/" && \
-    chmod -R 755 "/home/${dockerAppUser}/bin/"
+#RUN curl --silent --location "https://get.pulumi.com/releases/sdk/pulumi-v1.5.2-linux-x64.tar.gz" | tar xz -C /tmp && \
+#    mv /tmp/pulumi "/home/${dockerAppUser}/bin/" && \
+#    chmod -R 755 "/home/${dockerAppUser}/bin/"
 
 
 # Set the vault profile in the environment for assume-role scripts.
@@ -111,8 +111,8 @@ RUN curl --silent --location "https://get.pulumi.com/releases/sdk/pulumi-v1.5.2-
 RUN echo "export PATH=$PATH:/scripts:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc" && \
     echo "export TF_PLUGIN_CACHE_DIR=/home/${dockerAppUser}/.terraform.d/plugin-cache" | tee -a "/home/${dockerAppUser}/.zshrc" && \
     echo 'ZSH_THEME="agnoster"' | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo "export PATH=$PATH:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
+    echo "export PATH=$PATH:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc"
+#    echo "export PATH=$PATH:/home/${dockerAppUser}/bin/pulumi" | tee -a "/home/${dockerAppUser}/.zshrc"
 
 #EXPOSE 5000
 ENV GOROOT /usr/local/bin/go
