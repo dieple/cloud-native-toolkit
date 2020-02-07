@@ -30,13 +30,11 @@ echo $PROFILE
 
 # Modify to meet your env!
 #	--terraformVersion=0.12.15 \
+# --terraformVersion=0.11.14 \
 
 python3 ./toolkit.py \
-	--terraformVersion=0.11.14 \
+	--terraformVersion=0.12.19 \
 	--installTerraform=true \
 	--dockerAppUser=$PROFILE \
 	--shareHostVolume=$HOME/repos \
 	--imageName=$PROFILE
-
-
-

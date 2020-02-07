@@ -97,7 +97,7 @@ RUN curl -sL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/
     chmod +x /usr/local/bin/eksctl && \
     curl -sL -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.12.7/2019-03-27/bin/linux/amd64/aws-iam-authenticator && \
     chmod +x /usr/local/bin/aws-iam-authenticator && \
-    wget -q https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
+    wget -q https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
     chmod +x /usr/local/bin/helm && \
     wget -q https://github.com/derailed/k9s/releases/download/0.7.13/k9s_0.7.13_Linux_x86_64.tar.gz -O - | tar -xzO k9s > /usr/local/bin/k9s  && \
     chmod +x /usr/local/bin/k9s && \

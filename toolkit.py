@@ -47,8 +47,8 @@ def process_arguments():
     optional = parser._action_groups.pop()
     required = parser.add_argument_group('Required arguments')
 
-    # gh_user = os.environ.get('GITHUB_USERNAME')
-    # gh_email = os.environ.get('GITHUB_EMAIL')
+    gh_user = os.environ.get('GITHUB_USERNAME')
+    gh_email = os.environ.get('GITHUB_EMAIL')
 
     required.add_argument('--shareHostVolume',
                           help='Path where all development github repos are checked out. /home/<username>/repos',
@@ -67,15 +67,15 @@ def process_arguments():
     optional.add_argument("--kubeConfigDir", default="{0}/.kube".format(home_dir), help="Kubectl config directory")
     optional.add_argument("--sshKeyPassphrase", default="", help="ssh pass phrase")
 
-    # if is_empty(gh_user):
-    #     gh_user = default_input("Env [GITHUB_USERNAME] not set - Enter github username", "dieple1")
+    if is_empty(gh_user):
+        gh_user = default_input("Env [GITHUB_USERNAME] not set - Enter github username", "dieple1")
 
-    # if is_empty(gh_email):
-    #     gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "dieple1@gmail.com")
+    if is_empty(gh_email):
+        gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "dieple1@gmail.com")
 
     # print("DEBUG: gh_user {0}, gh_email {1}".format(gh_user, gh_email))
-    # optional.add_argument('--githubUsername', help='Github username', default="{0}".format(gh_user))
-    # optional.add_argument('--githubEmail', help='Github email', default="{0}".format(gh_email))
+    optional.add_argument('--githubUsername', help='Github username', default="{0}".format(gh_user))
+    optional.add_argument('--githubEmail', help='Github email', default="{0}".format(gh_email))
 
     # optional.add_argument("--installFlyCLI", type=str2bool, nargs='?', const=True, default=True, help="Install
     # Concourse Fly CLI?")
@@ -87,8 +87,8 @@ def process_arguments():
 
 def create_docker_entry_file(args, entry_filename):
     with open(entry_filename, 'w', newline='\n') as f:
-        # gh_email = 'git config --global user.email "{0}"\n'.format(args.githubEmail)
-        # gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
+        gh_email = 'git config --global user.email "{0}"\n'.format(args.githubEmail)
+        gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
         # assume_role = "set -x && . /scripts/assume-role.sh {0} reassume-role\n".format(args.profile)
 
         mvcat = "cat /home/{0}/.zshrc.pre-oh-my-zsh >> /home/{0}/.zshrc\n".format(args.dockerAppUser)
@@ -96,19 +96,19 @@ def create_docker_entry_file(args, entry_filename):
         src = "source /home/{0}/.zshrc\n".format(args.dockerAppUser)
         exec_stmt = 'exec "$@"\n'
 
-        if "0.12" in args.terraformVersion:
-            clone_repo = 'cd /tmp && git clone https://github.com/mjuenema/python-terrascript.git\n'
-            install_terrascript = 'cd /tmp/python-terrascript && git checkout develop && make install && cd /repos\n'
+        # if "0.12" in args.terraformVersion:
+        #     clone_repo = 'cd /tmp && git clone https://github.com/mjuenema/python-terrascript.git\n'
+        #     install_terrascript = 'cd /tmp/python-terrascript && git checkout develop && make install && cd /repos\n'
 
         f.write('#!/bin/bash\n\n')
         f.write('# Please do not modify this file manually as it generate by toolkit.py\n\n')
-        # f.write(gh_email)
-        # f.write(gh_user)
+        f.write(gh_email)
+        f.write(gh_user)
         f.write("wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true\n")
 
-        if "0.12" in args.terraformVersion:
-            f.write(clone_repo)
-            f.write(install_terrascript)
+        # if "0.12" in args.terraformVersion:
+        #     f.write(clone_repo)
+        #     f.write(install_terrascript)
 
         # f.write(assume_role)
         # f.write("\nhelm init\n")
@@ -137,11 +137,11 @@ def create_pip_packages_file(args, input_pip_packages_file, output_pip_packages_
         with open(output_pip_packages_file, "a") as f:
             f.write("ansible=={0}\n".format(args.ansibleVersion))
 
-    if "0.11" in args.terraformVersion:
-        # terraform module 0.11.x is used
-				# version 0.12.x is dealt with entry.sh file
-        with open(output_pip_packages_file, "a") as f:
-            f.write("terrascript==0.6.1\n")
+    # if "0.11" in args.terraformVersion:
+    #     # terraform module 0.11.x is used
+	# 			# version 0.12.x is dealt with entry.sh file
+    #     with open(output_pip_packages_file, "a") as f:
+    #         f.write("terrascript==0.6.1\n")
 
 def create_dockerfile_from_template(args, dockerfile_template, output_dockerfile):
     with open(dockerfile_template) as fin:
