@@ -1,38 +1,51 @@
 #!/usr/bin/env bash
 
-PROFILE=${1:-toolkit}
+#set -x
 
-usage(){
-cat <<!
-$(basename $0) - check to see if a column exists in an object
+PROG="`basename $0`"
 
-Usage: $(basename $0) <Profile>
-!
+usage() {
+	echo ""
+	echo "Usage: $PROG [options]"
+	echo ""
+	echo "[-v]  Image tag version"
+	echo
 }
+
 
 check_params(){
 
-if [ $# -ne 1 ]
-then
-    echo "Error: Incorrect number of arguments" >&2
-    usage >&2
-    exit 1
-fi
+  if [ "$BASE_IMAGE_VERSION" = "" ]; then
+      echo ""
+      echo "$PROG: \$VERSION not set! (e.g. 0.0.2)"
+      echo ""
+      usage
+      exit 0
+  fi
 }
-
 
 ####
 # Main
 ####
 
-check_params $PROFILE
-echo $PROFILE
+while getopts v:? 2> /dev/null ARG
+do
+	case $ARG in
+		v)	BASE_IMAGE_VERSION=$OPTARG;;
+
+		?)	usage
+			exit 0;;
+	esac
+done
+
+check_params
 
 # Modify to meet your env!
 # --terraformVersion=0.11.14 \
 python3 ./toolkit.py \
 	--terraformVersion=0.12.19 \
 	--installTerraform=true \
-	--dockerAppUser=$PROFILE \
-	--shareHostVolume=$HOME/repos \
-	--imageName=$PROFILE
+	--shareHostVolume="$HOME/repos" \
+	--baseImageName=dieple/cloud-native-toolkit \
+	--baseImageVersion="$BASE_IMAGE_VERSION" \
+	--toolkitImageName="toolkit"

@@ -49,6 +49,7 @@ RUN set -ex && \
                         groff \
                         ca-certificates \
                         zsh \
+                        bash \
                         fonts-powerline \
                         dconf-cli \
                         openssh-client \
@@ -81,6 +82,7 @@ RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add 
 
 RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
 
+# wget -q https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
 RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 | tee /usr/local/bin/json2hcl > /dev/null && \
     chmod 755 /usr/local/bin/json2hcl && \
     curl -sL -o /usr/local/bin/yaml2json https://github.com/wakeful/yaml2json/releases/download/0.3.1/yaml2json-linux-amd64 && \
@@ -104,7 +106,17 @@ RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_
     curl -sL -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip && \
     unzip 1password.zip -d /usr/local/bin && \
     rm 1password.zip && \
-    rm -rf /root/.cache && rm -rf /tmp/*
+    rm -rf /root/.cache &&
+    apt-get autoremove -yqq --purge && \
+                rm -rf /tmp/*.rpm && \
+                apt-get clean && \
+                rm -rf \
+                    /var/lib/apt/lists/* \
+                    /tmp/* \
+                    /var/tmp/* \
+                    /usr/share/man \
+                    /usr/share/doc \
+                    /usr/share/doc-base
 
 #RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
 #CMD [ "zsh" ]

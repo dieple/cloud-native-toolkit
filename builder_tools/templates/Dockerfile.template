@@ -5,13 +5,13 @@
 # by setup.py. All modifications should be done in
 # templates/Dockerfile.template
 #################################################################
-FROM dieple/cloud-native-toolkit:latest
-
 #ARG profile
-ARG terraformVersion
+ARG terraformVersion=0.12.19
 ARG flyCLIVersion
-ARG dockerAppUser
 ARG sshKeyPassphrase
+ARG baseImageVersion
+
+FROM dieple/cloud-native-toolkit:${baseImageVersion}
 
 # Warning: It is not recommended to use build-time variables for passing secrets like github
 # keys, user credentials etc.
@@ -22,6 +22,8 @@ ARG sshKey
 ARG sshKeyPub
 
 #ENV TERM=xterm-256color
+
+ENV TERRAFORM_VERSION=${terraformVersion}
 
 # Set this environment variable to true to set timezone on container start.
 ENV SET_CONTAINER_TIMEZONE false
@@ -34,16 +36,18 @@ ENV ZSH_THEME agnoster
 
 ENV PATH /usr/local/bin/go/bin:$PATH
 
-###INSTALL_TERRAFORM###RUN curl -sL -o $HOME/terraform.zip \
-    "https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip" && \
-    unzip $HOME/terraform.zip -d /usr/local/bin && rm -rf $HOME/terraform.zip
+RUN echo "root:toolkit" |chpasswd && \
+    useradd -ms /bin/zsh -G sudo toolkit && \
+    echo "toolkit:toolkit" |chpasswd
 
-
-RUN echo "root:${dockerAppUser}" |chpasswd \
-    && useradd -ms /bin/zsh ${dockerAppUser} \
-    && echo "${dockerAppUser}:${dockerAppUser}" |chpasswd \
-    && adduser "${dockerAppUser}" sudo
-
+# Not too sure why ${terraformVersion} is null !!!
+#wget -q https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip && \
+###INSTALL_TERRAFORM###RUN cd /tmp && \
+    wget -q https://releases.hashicorp.com/terraform/0.12.20/terraform_0.12.20_linux_amd64.zip && \
+    unzip terraform_0.12.20_linux_amd64.zip -d /usr/local/bin && \
+    rm -rf /tmp/* && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /var/tmp/*
 
 VOLUME ["/repos"]
 
@@ -53,7 +57,7 @@ COPY ./builder_tools/scripts/packages /scripts/packages
 ADD pip_packages /scripts/packages/
 ADD ./builder_tools/scripts/ntp.sh "/scripts"
 RUN /scripts/ntp.sh && \
-    chown -R "${dockerAppUser}:${dockerAppUser}" /scripts
+    chown -R "toolkit:toolkit" /scripts
 
 WORKDIR /scripts/packages
 
@@ -65,48 +69,48 @@ RUN pip install setuptools && \
 	pip install ./render-templates && \
 	pip install ./pgbackup && \
     rm -rf $HOME/.cache && \
-    mkdir -p "/home/${dockerAppUser}/.ssh" &&  \
-    chmod 0700 "/home/${dockerAppUser}/.ssh" && \
-    chown -R "${dockerAppUser}:${dockerAppUser}" "/home/${dockerAppUser}/.ssh" && \
-    mkdir /home/${dockerAppUser}/bin
+    mkdir -p "/home/toolkit/.ssh" &&  \
+    chmod 0700 "/home/toolkit/.ssh" && \
+    chown -R "toolkit:toolkit" "/home/toolkit/.ssh" && \
+    mkdir /home/toolkit/bin
 
-#RUN echo "$sshKey" > "/home/${dockerAppUser}/.ssh/id_rsa" && chmod 0600 "/home/${dockerAppUser}/.ssh/id_rsa"
-#RUN echo "$sshKeyPub" > "/home/${dockerAppUser}/.ssh/id_rsa.pub" && chmod 0644 "/home/${dockerAppUser}/.ssh/id_rsa.pub"
+#RUN echo "$sshKey" > "/home/toolkit/.ssh/id_rsa" && chmod 0600 "/home/toolkit/.ssh/id_rsa"
+#RUN echo "$sshKeyPub" > "/home/toolkit/.ssh/id_rsa.pub" && chmod 0644 "/home/toolkit/.ssh/id_rsa.pub"
 
 # DataOps Snowflake Cloner tool.
-#COPY ./builder_tools/bin/sfcloner-linux-amd64-1.0.0 /home/${dockerAppUser}/bin
-#COPY ./builder_tools/bin/sfcloner /home/${dockerAppUser}/bin
+#COPY ./builder_tools/bin/sfcloner-linux-amd64-1.0.0 /home/toolkit/bin
+#COPY ./builder_tools/bin/sfcloner /home/toolkit/bin
 # This is required when create aws system user (for external S3 and CI/CD purpose)
 #COPY ./builder_tools/bin/dataops.gpg.pub.bin /scripts/dataops.gpg.pub.bin
 
-ADD ./builder_tools/scripts/unassume /home/${dockerAppUser}/bin
-ADD ./builder_tools/scripts/kms_encrypt.py /home/${dockerAppUser}/bin
-ADD ./builder_tools/scripts/kms_decrypt.py /home/${dockerAppUser}/bin
+ADD ./builder_tools/scripts/unassume /home/toolkit/bin
+ADD ./builder_tools/scripts/kms_encrypt.py /home/toolkit/bin
+ADD ./builder_tools/scripts/kms_decrypt.py /home/toolkit/bin
 
 #RUN eval `ssh-agent -s` && \
-#    printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /home/${dockerAppUser}/.ssh/id_rsa
+#    printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /home/toolkit/.ssh/id_rsa
 
-USER ${dockerAppuser}
 
-ADD ./builder_tools/templates/vimrc "/home/${dockerAppUser}/.vimrc"
+ADD ./builder_tools/templates/vimrc "/home/toolkit/.vimrc"
 
-RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo 'alias k=kubectl' | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo 'alias k9s="export TERM=xterm && k9s"' | tee -a "/home/${dockerAppUser}/.zshrc"
+RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/toolkit/.zshrc" && \
+    echo 'alias k=kubectl' | tee -a "/home/toolkit/.zshrc" && \
+    echo 'alias k9s="export TERM=xterm && k9s"' | tee -a "/home/toolkit/.zshrc"
 
 # Set the vault profile in the environment for assume-role scripts.
 #ENV VAULT_PROFILE=$profile
 
 # Setup TERM and PS1
-#ENV TERM=xterm-color
-#RUN echo '#override PS1' | tee -a "/home/${dockerAppUser}/.bashrc"
-#RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/${dockerAppUser}/.bashrc"
+ENV TERM=xterm-color
+#RUN echo '#override PS1' | tee -a "/home/toolkit/.bashrc"
+RUN echo '#override PS1' | tee -a "/home/toolkit/.zshrc"
+RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/toolkit/.zshrc"
 
 # Add to PATH variable.
-RUN echo "export PATH=$PATH:/scripts:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo "export TF_PLUGIN_CACHE_DIR=/home/${dockerAppUser}/.terraform.d/plugin-cache" | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo 'ZSH_THEME="agnoster"' | tee -a "/home/${dockerAppUser}/.zshrc" && \
-    echo "export PATH=$PATH:/home/${dockerAppUser}/bin" | tee -a "/home/${dockerAppUser}/.zshrc"
+RUN echo "export PATH=$PATH:/scripts:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc" && \
+    echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc" && \
+    echo 'ZSH_THEME="agnoster"' | tee -a "/home/toolkit/.zshrc" && \
+    echo "export PATH=$PATH:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc"
 
 #EXPOSE 5000
 ENV GOROOT /usr/local/bin/go
@@ -121,13 +125,14 @@ ADD entry.sh /scripts/
 #RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
 
 # installing “agnoster” Oh My ZSH theme
-#RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && su - ${dockerAppUser} -c ./install.sh
+#RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && su - toolkit -c ./install.sh
 
-RUN chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}
-#RUN chown -R "${dockerAppUser}:${dockerAppUser}" /home/${dockerAppUser}/.terraform.d
+RUN chown -R "toolkit:toolkit" /home/toolkit
+#RUN chown -R "toolkit:toolkit" /home/toolkit/.terraform.d
 
 RUN ln -s /usr/bin/python3 /usr/local/bin/python3
 
+USER toolkit
 #CMD  python /scripts/api-server.py /repos
 #CMD ["zsh"]
 ENTRYPOINT ["/scripts/entry.sh"]

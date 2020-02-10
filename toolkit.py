@@ -53,13 +53,15 @@ def process_arguments():
     required.add_argument('--shareHostVolume',
                           help='Path where all development github repos are checked out. /home/<username>/repos',
                           required=True)
-    optional.add_argument('--imageName', help='Docker image name', default='cloudops')
-    optional.add_argument('--dockerAppUser', help='Docker OS App user', default='cloudops')
-
+    required.add_argument('--baseImageVersion',
+                          help='The toolkit base image version to use - e.g. 0.0.2',
+                          required=True)
+    optional.add_argument('--toolkitImageName', help='End result tookit Docker image name', default='toolkit')
+    optional.add_argument('--baseImageName', help='Base Docker image name', default='dieple/cloud-native-toolkit')
     optional.add_argument('--ansibleVersion', help='Ansible version', default='2.8.3')
     optional.add_argument("--installAnsible", type=str2bool, nargs='?', const=True, default=True, help="Install ansible?")
 
-    optional.add_argument('--terraformVersion', help='Terraform version', default='0.11.14')
+    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.19')
     optional.add_argument("--installTerraform", type=str2bool, nargs='?', const=True, default=True, help="Install Terraform?")
 
     optional.add_argument("--sshKeyDir", default="{0}/.ssh".format(home_dir), help="Host ssh directory")
@@ -87,9 +89,9 @@ def create_docker_entry_file(args, entry_filename):
         gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
         # assume_role = "set -x && . /scripts/assume-role.sh {0} reassume-role\n".format(args.profile)
 
-        mvcat = "cat /home/{0}/.zshrc.pre-oh-my-zsh >> /home/{0}/.zshrc\n".format(args.dockerAppUser)
+        mvcat = "cat /home/{0}/.zshrc.pre-oh-my-zsh >> /home/toolkit/.zshrc\n"
 
-        src = "source /home/{0}/.zshrc\n".format(args.dockerAppUser)
+        src = "source /home/toolkit/.zshrc\n"
         exec_stmt = 'exec "$@"\n'
 
         f.write('#!/bin/bash\n\n')
@@ -99,7 +101,7 @@ def create_docker_entry_file(args, entry_filename):
         f.write("wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true\n")
 
         # f.write("eval `ssh-agent -s`")
-        # f.write("printf '${sshKeyPassphrase}\n' | ssh-add /home/${dockerAppUser}/.ssh/id_rsa")
+        # f.write("printf '${sshKeyPassphrase}\n' | ssh-add /home/toolkit/.ssh/id_rsa")
 
         f.write(mvcat)
         f.write(src)
@@ -138,13 +140,11 @@ def create_dockerfile_from_template(args, dockerfile_template, output_dockerfile
 
 
 def build_docker_image(args, dockerfile):
-    build_command = 'docker build --build-arg terraformVersion={0} \
-                                  --build-arg dockerAppUser={1} \
-                                  --build-arg sshKeyPassphrase={2} \
-                                  --build-arg sshKey="$(cat {5}/id_rsa)" \
-                                  --build-arg sshKeyPub="$(cat {5}/id_rsa.pub)" \
-                                  --rm -f {3} -t {4}:latest .'.format(args.terraformVersion, args.dockerAppUser, \
-                                                                      args.sshKeyPassphrase, dockerfile, args.imageName, args.sshKeyDir)
+    toolkit_image_name = "{0}:{1}".format(args.toolkitImageName, args.baseImageVersion)
+    TFVersion = args.terraformVersion
+    print("TFVersion: {0}".format(TFVersion))
+
+    build_command = 'docker build --build-arg terraformVersion={0} --build-arg dockerAppUser={1} --build-arg sshKeyPassphrase={2} --build-arg sshKey="$(cat {5}/id_rsa)"  --build-arg sshKeyPub="$(cat {5}/id_rsa.pub)" --build-arg baseImageVersion={6} --rm -f {3} -t {4} .'.format(TFVersion, "toolkit", args.sshKeyPassphrase, dockerfile, toolkit_image_name, args.sshKeyDir, args.baseImageVersion)
 
     logger.info("build_command: {0}".format(build_command))
     os.system(build_command)
@@ -153,6 +153,7 @@ def build_docker_image(args, dockerfile):
 def run_docker_image(args):
 
     tf_cache_plugins_dir = "{0}/.terraform.d/plugin-cache".format(home_dir)
+    toolkit_image_name = "{0}:{1}".format(args.toolkitImageName, args.baseImageVersion)
 
     run_command = 'docker run -e "SET_CONTAINER_TIMEZONE=true" \
                         -e "CONTAINER_TIMEZONE=Europe/London" \
@@ -162,9 +163,9 @@ def run_docker_image(args):
                         --volume "{3}:/home/{0}/.aws" \
                         --volume "{4}:/repos" \
                         --volume "{5}:/home/{0}/.terraform.d/plugin-cache" \
-                        {6} /bin/bash'.format(args.dockerAppUser, args.kubeConfigDir, args.sshKeyDir, \
+                        {6} /bin/bash'.format("toolkit", args.kubeConfigDir, args.sshKeyDir, \
                                               args.awsConfigDir, args.shareHostVolume, \
-                                              tf_cache_plugins_dir, args.imageName)
+                                              tf_cache_plugins_dir, toolkit_image_name)
 
     logger.info("run_command: {0}".format(run_command))
     os.system(run_command)
@@ -173,6 +174,7 @@ def run_docker_image(args):
 def main():
 
     args = process_arguments()
+    print("args: {0}".format(args))
 
     create_docker_entry_file(args, entry_filename)
     create_pip_packages_file(args, input_pip_packages_file, output_pip_packages_file)
