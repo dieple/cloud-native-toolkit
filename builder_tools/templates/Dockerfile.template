@@ -113,10 +113,10 @@ RUN echo "export PATH=$PATH:/scripts:/home/toolkit/bin" | tee -a "/home/toolkit/
     echo "export PATH=$PATH:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc"
 
 #EXPOSE 5000
-ENV GOROOT /usr/local/bin/go
-ENV GOPATH /repos/golang/golib
-ENV PATH $GOPATH/bin:$PATH:$GOROOT/bin
-ENV GOPATH $GOPATH:/repos/golang/go
+#ENV GOROOT /usr/local/bin/go
+#ENV GOPATH /repos/golang/golib
+#ENV PATH $GOPATH/bin:$PATH:$GOROOT/bin
+#ENV GOPATH $GOPATH:/repos/golang/go
 WORKDIR /repos
 
 ADD entry.sh /scripts/

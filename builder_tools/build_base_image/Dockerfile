@@ -106,7 +106,9 @@ RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_
     curl -sL -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip && \
     unzip 1password.zip -d /usr/local/bin && \
     rm 1password.zip && \
-    rm -rf /root/.cache &&
+    wget -q https://github.com/junegunn/fzf-bin/releases/download/0.20.0/fzf-0.20.0-linux_amd64.tgz -O - | tar -xzO fzf > /usr/local/bin/fzf  && \
+    chmod +x /usr/local/bin/fzf && \
+    rm -rf /root/.cache && \
     apt-get autoremove -yqq --purge && \
                 rm -rf /tmp/*.rpm && \
                 apt-get clean && \
