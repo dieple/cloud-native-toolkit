@@ -89,7 +89,7 @@ def create_docker_entry_file(args, entry_filename):
         gh_user = 'git config --global user.name "{0}"\n'.format(args.githubUsername)
         # assume_role = "set -x && . /scripts/assume-role.sh {0} reassume-role\n".format(args.profile)
 
-        mvcat = "cat /home/{0}/.zshrc.pre-oh-my-zsh >> /home/toolkit/.zshrc\n"
+        mvcat = "cat /home/toolkit/.zshrc.pre-oh-my-zsh >> /home/toolkit/.zshrc\n"
 
         src = "source /home/toolkit/.zshrc\n"
         exec_stmt = 'exec "$@"\n'
@@ -163,7 +163,7 @@ def run_docker_image(args):
                         --volume "{3}:/home/{0}/.aws" \
                         --volume "{4}:/repos" \
                         --volume "{5}:/home/{0}/.terraform.d/plugin-cache" \
-                        {6} /bin/bash'.format("toolkit", args.kubeConfigDir, args.sshKeyDir, \
+                        {6} /usr/bin/zsh'.format("toolkit", args.kubeConfigDir, args.sshKeyDir, \
                                               args.awsConfigDir, args.shareHostVolume, \
                                               tf_cache_plugins_dir, toolkit_image_name)
 

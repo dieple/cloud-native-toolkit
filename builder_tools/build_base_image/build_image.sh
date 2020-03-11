@@ -2,6 +2,7 @@
 
 #set -x
 PROG="`basename $0`"
+PUSH="FALSE"
 
 
 usage() {
@@ -10,6 +11,7 @@ usage() {
 	echo ""
 	echo "[-u]  Docker hub user id"
 	echo "[-v]  Image tag version"
+	echo "[-p]  Push Image tag to Dockerhub?"
 	echo
 }
 
@@ -37,12 +39,14 @@ check_params(){
 # Main
 ####
 
-while getopts u:v:? 2> /dev/null ARG
+while getopts u:v:p? 2> /dev/null ARG
 do
 	case $ARG in
 		u)	USERID=$OPTARG;;
 
 		v)	VERSION=$OPTARG;;
+
+		p)	PUSH="TRUE";;
 
 		?)	usage
 			exit 0;;
@@ -53,5 +57,8 @@ check_params
 
 docker build -t ${USERID}/cloud-native-toolkit:${VERSION} .
 docker tag ${USERID}/cloud-native-toolkit:${VERSION} ${USERID}/cloud-native-toolkit:latest
-docker push ${USERID}/cloud-native-toolkit:${VERSION}
-docker push ${USERID}/cloud-native-toolkit:latest
+
+if [[ x"$PUSH" = x"TRUE" ]]; then
+  docker push ${USERID}/cloud-native-toolkit:${VERSION}
+  docker push ${USERID}/cloud-native-toolkit:latest
+fi

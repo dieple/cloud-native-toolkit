@@ -17,7 +17,7 @@ check_params(){
 
   if [ "$BASE_IMAGE_VERSION" = "" ]; then
       echo ""
-      echo "$PROG: \$VERSION not set! (e.g. 0.0.2)"
+      echo "$PROG: \$VERSION not set! (e.g. 0.0.5)"
       echo ""
       usage
       exit 0

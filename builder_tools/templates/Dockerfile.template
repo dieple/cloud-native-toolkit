@@ -22,6 +22,7 @@ ARG sshKey
 ARG sshKeyPub
 
 #ENV TERM=xterm-256color
+ENV TERM xterm
 
 ENV TERRAFORM_VERSION=${terraformVersion}
 
@@ -31,11 +32,7 @@ ENV SET_CONTAINER_TIMEZONE false
 # Default container timezone as found under the directory /usr/share/zoneinfo/.
 ENV CONTAINER_TIMEZONE Europe/London
 
-# set the zsh theme
-ENV ZSH_THEME agnoster
-
-ENV PATH /usr/local/bin/go/bin:$PATH
-
+RUN apt-get -y install fonts-powerline
 RUN echo "root:toolkit" |chpasswd && \
     useradd -ms /bin/zsh -G sudo toolkit && \
     echo "toolkit:toolkit" |chpasswd
@@ -103,8 +100,8 @@ RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/toolkit/.zshrc" && \
 # Setup TERM and PS1
 ENV TERM=xterm-color
 #RUN echo '#override PS1' | tee -a "/home/toolkit/.bashrc"
-RUN echo '#override PS1' | tee -a "/home/toolkit/.zshrc"
-RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/toolkit/.zshrc"
+#RUN echo '#override PS1' | tee -a "/home/toolkit/.zshrc"
+#RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/toolkit/.zshrc"
 
 # Add to PATH variable.
 RUN echo "export PATH=$PATH:/scripts:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc" && \
@@ -122,18 +119,17 @@ WORKDIR /repos
 
 ADD entry.sh /scripts/
 
-# run the installation script
-#RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
-
-# installing “agnoster” Oh My ZSH theme
-#RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && su - toolkit -c ./install.sh
-
 RUN chown -R "toolkit:toolkit" /home/toolkit
 #RUN chown -R "toolkit:toolkit" /home/toolkit/.terraform.d
 
-RUN ln -s /usr/bin/python3 /usr/local/bin/python3
 
+# set the zsh theme
+ENV ZSH_THEME agnoster
+RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 USER toolkit
+# installing “agnoster” Oh My ZSH theme
+#RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
+#RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && ./install.sh
+
 #CMD  python /scripts/api-server.py /repos
-#CMD ["zsh"]
 ENTRYPOINT ["/scripts/entry.sh"]
