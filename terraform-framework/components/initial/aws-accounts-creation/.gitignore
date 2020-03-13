@@ -1,6 +1,0 @@
-.terraform
-
-# .tfstate files
-*.tfstate
-*.tfstate.*
-*_override.tf
