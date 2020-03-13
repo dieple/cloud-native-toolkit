@@ -1,0 +1,8 @@
+.terraform
+tfplan
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+*_override.tf
