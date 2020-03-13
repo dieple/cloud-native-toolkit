@@ -15,11 +15,11 @@ Include this repository as a module in your existing terraform code:
 
 ```hcl
 module "label" {
-  source      = "git::https://github.com/travelex/terraform-aws-label.git?ref=<release-tag-version>"
+  source      = "git::https://github.com/dieple/cloud-native-toolkit.git/terraform-framework/modules/core/tagging.git?ref=<release-tag-version>"
 
-  customer    = "tvx"
-  product     = "plfm"
-  environment = "tst"
+  customer    = "dataops"
+  product     = "lake"
+  environment = "dev"
   attributes  = ["eks"]
   delimiter   = "-"
 
@@ -30,7 +30,7 @@ module "label" {
 }
 ```
 
-This will create an `id` with the value of `tvx-plfm-tst-eks`.
+This will create an `id` with the value of `dataops-lake-dev-eks`.
 
 Now reference the label when creating an eks cluster (for example):
 
@@ -66,10 +66,10 @@ Here is a more complex example with two instances using two different labels. No
 
 ```hcl
 module "bastion_abc_label" {
-  source      = "git::https://github.com/travelex/terraform-aws-label.git?ref=<release-tag-version>"
-  customer    = "tvx"
-  product     = "plfm"
-  environment = "tst"
+  source      = "git::https://github.com/dieple/cloud-native-toolkit.git/terraform-framework/modules/core/tagging.git?ref=<release-tag-version>"
+  customer    = "dataops"
+  product     = "lake"
+  environment = "dev"
   attributes  = ["eks"]
   delimiter   = "-"
 
