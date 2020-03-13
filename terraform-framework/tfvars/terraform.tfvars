@@ -1,3 +1,0 @@
-# common
-delimiter       = "-"
-enabled         = "true"

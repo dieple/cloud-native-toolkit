@@ -1,5 +1,0 @@
-**.terraform/
-*.tfstate*
-tfplan
-.idea
-*.DS_Store
