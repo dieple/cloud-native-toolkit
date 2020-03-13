@@ -1,0 +1,13 @@
+cidr                   = "10.0.0.0/16"
+public_subnets         = ["10.0.0.0/22", "10.0.4.0/22", "10.0.8.0/22"]
+private_subnets        = ["10.0.16.0/22", "10.0.20.0/22", "10.0.24.0/22"]
+database_subnets       = ["10.0.32.0/22", "10.0.36.0/22", "10.0.40.0/22"]
+public_subnet_suffix   = "public"
+private_subnet_suffix  = "private"
+database_subnet_suffix = "database"
+enable_nat_gateway     = true
+one_nat_gateway_per_az = true
+enable_dns_hostnames   = true
+enable_dns_support     = true
+enable_s3_endpoint     = true
+shared_tag             = "shared"
