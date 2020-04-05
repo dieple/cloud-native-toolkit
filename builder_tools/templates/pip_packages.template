@@ -44,7 +44,7 @@ six==1.11.0
 wheel==0.24.0
 simple-crypt==4.1.7
 PyGithub==1.43.8
-awacs==0.9.6
+awacs==0.9.8
 pytest==5.2.2
 astunparse==1.6.2
 ostruct==4.0.0
@@ -52,3 +52,4 @@ virtualenv==16.7.7
 iterfzf==0.5.0.20.0
 terrascript==0.8.0
 scandir==1.10.0
+hvac==0.10.0
