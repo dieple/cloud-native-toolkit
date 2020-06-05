@@ -104,7 +104,8 @@ RUN apt-get update && \
                        git-core \
                        gnupg \
                        linuxbrew-wrapper \
-                       locales
+                       locales \
+                       mysql-client
 
 RUN cd /usr/local/bin && \
     ln -s /usr/bin/python3.7 python3 && \
@@ -114,7 +115,8 @@ RUN cd /usr/local/bin && \
     unlink /usr/bin/python && \
     ln -s python3.7 python3 && \
     ln -s python3.7 python && \
-    pip3 install --upgrade pip
+    pip3 install --upgrade pip && \
+    pip3 install mysql-connector
 
 # install kubectl
 RUN apt-get -y update && \

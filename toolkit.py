@@ -61,7 +61,7 @@ def process_arguments():
     optional.add_argument('--ansibleVersion', help='Ansible version', default='2.8.3')
     optional.add_argument("--installAnsible", type=str2bool, nargs='?', const=True, default=True, help="Install ansible?")
 
-    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.19')
+    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.24')
     optional.add_argument("--installTerraform", type=str2bool, nargs='?', const=True, default=True, help="Install Terraform?")
 
     optional.add_argument("--sshKeyDir", default="{0}/.ssh".format(home_dir), help="Host ssh directory")
@@ -154,6 +154,7 @@ def run_docker_image(args):
 
     tf_cache_plugins_dir = "{0}/.terraform.d/plugin-cache".format(home_dir)
     toolkit_image_name = "{0}:{1}".format(args.toolkitImageName, args.baseImageVersion)
+
 
     run_command = 'docker run -e "SET_CONTAINER_TIMEZONE=true" \
                         -e "CONTAINER_TIMEZONE=Europe/London" \
