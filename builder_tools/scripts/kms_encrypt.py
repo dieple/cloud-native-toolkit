@@ -7,8 +7,8 @@ def process_arguments():
     parser = argparse.ArgumentParser()
     optional = parser._action_groups.pop()
     required = parser.add_argument_group('Required arguments')
-    required.add_argument('--keyId', help='Kms key Id or alias', required=True)
-    required.add_argument('--plainText', help='Plaintext password to encrypt', required=True)
+    required.add_argument('-k', '--keyId', help='Kms key Id or alias', required=True)
+    required.add_argument('-p', '--plainText', help='Plaintext password to encrypt', required=True)
     #parser._action_groups.append(optional)
     return parser.parse_args()
 
