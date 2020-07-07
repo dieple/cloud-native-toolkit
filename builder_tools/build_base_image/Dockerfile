@@ -84,6 +84,7 @@ RUN apt-get update && \
                        gcc \
                        g++ \
                        libssl-dev \
+                       asciinema \
                        zip \
                        unzip \
                        tar \
@@ -160,6 +161,7 @@ RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_
         /usr/share/man \
         /usr/share/doc \
         /usr/share/doc-base
+
 
 #RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 #RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true

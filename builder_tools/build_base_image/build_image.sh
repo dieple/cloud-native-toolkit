@@ -55,10 +55,10 @@ done
 
 check_params
 
-docker build -t ${USERID}/cloud-native-toolkit:${VERSION} .
-docker tag ${USERID}/cloud-native-toolkit:${VERSION} ${USERID}/cloud-native-toolkit:latest
+docker build -t ${USERID}/toolkit:${VERSION} .
+docker tag ${USERID}/toolkit:${VERSION} ${USERID}/toolkit:latest
 
 if [[ x"$PUSH" = x"TRUE" ]]; then
-  docker push ${USERID}/cloud-native-toolkit:${VERSION}
-  docker push ${USERID}/cloud-native-toolkit:latest
+  docker push ${USERID}/toolkit:${VERSION}
+  docker push ${USERID}/toolkit:latest
 fi

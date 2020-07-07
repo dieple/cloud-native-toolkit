@@ -131,5 +131,7 @@ USER toolkit
 #RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 #RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && ./install.sh
 
+WORKDIR /repos
+
 #CMD  python /scripts/api-server.py /repos
 ENTRYPOINT ["/scripts/entry.sh"]
