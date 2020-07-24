@@ -150,6 +150,8 @@ RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_
     chmod +x /usr/local/bin/assume-role && \
     wget -q https://github.com/junegunn/fzf-bin/releases/download/0.20.0/fzf-0.20.0-linux_amd64.tgz -O - | tar -xzO fzf > /usr/local/bin/fzf  && \
     chmod +x /usr/local/bin/fzf && \
+    curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
+    install skaffold /usr/local/bin/ && \
     rm -rf /root/.cache && \
     apt-get autoremove -yqq --purge && \
     rm -rf /tmp/*.rpm && \

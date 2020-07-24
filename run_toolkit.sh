@@ -46,6 +46,6 @@ python3 ./toolkit.py \
 	--terraformVersion=0.12.24 \
 	--installTerraform=true \
 	--shareHostVolume="$HOME/repos" \
-	--baseImageName=dieple/toolkit \
+	--baseImageName="dieple/cloud-native-toolkit" \
 	--baseImageVersion="$BASE_IMAGE_VERSION" \
 	--toolkitImageName="toolkit"
