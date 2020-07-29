@@ -49,6 +49,8 @@ FROM ubuntu:18.04
 WORKDIR /
 COPY --from=builder /tmp/zsh-install /
 
+
+
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:ubuntu-toolchain-r/ppa && \
@@ -129,7 +131,10 @@ RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/a
 
 # wget -q https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
 #curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz | tar -C /usr/local/bin -xz && \
-RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 | tee /usr/local/bin/json2hcl > /dev/null && \
+RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh && bash nodesource_setup.sh && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
+    curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 | tee /usr/local/bin/json2hcl > /dev/null && \
     chmod 755 /usr/local/bin/json2hcl && \
     curl -sL -o /usr/local/bin/yaml2json https://github.com/wakeful/yaml2json/releases/download/0.3.1/yaml2json-linux-amd64 && \
     chmod +x /usr/local/bin/yaml2json && \
@@ -152,6 +157,7 @@ RUN curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_
     chmod +x /usr/local/bin/fzf && \
     curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
     install skaffold /usr/local/bin/ && \
+    npm install -g @mhlabs/iam-policies-cli && \
     rm -rf /root/.cache && \
     apt-get autoremove -yqq --purge && \
     rm -rf /tmp/*.rpm && \
