@@ -61,7 +61,7 @@ def process_arguments():
     optional.add_argument('--ansibleVersion', help='Ansible version', default='2.8.3')
     optional.add_argument("--installAnsible", type=str2bool, nargs='?', const=True, default=True, help="Install ansible?")
 
-    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.24')
+    optional.add_argument('--terraformVersion', help='Terraform version', default='0.13.0')
     optional.add_argument("--installTerraform", type=str2bool, nargs='?', const=True, default=True, help="Install Terraform?")
 
     optional.add_argument("--sshKeyDir", default="{0}/.ssh".format(home_dir), help="Host ssh directory")
