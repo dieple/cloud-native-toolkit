@@ -6,7 +6,7 @@
 # templates/Dockerfile.template
 #################################################################
 #ARG profile
-ARG terraformVersion=0.13.0
+ARG terraformVersion=0.12.24
 ARG flyCLIVersion
 ARG sshKeyPassphrase
 ARG baseImageVersion
@@ -40,8 +40,8 @@ RUN echo "root:toolkit" |chpasswd && \
 # Not too sure why ${terraformVersion} is null !!!
 #wget -q https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip && \
 ###INSTALL_TERRAFORM###RUN cd /tmp && \
-    wget -q https://releases.hashicorp.com/terraform/0.13.0/terraform_0.13.0_linux_amd64.zip && \
-    unzip terraform_0.13.0_linux_amd64.zip -d /usr/local/bin && \
+    wget -q https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip && \
+    unzip terraform_0.12.24_linux_amd64.zip -d /usr/local/bin && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/* && \
     rm -rf /var/tmp/*
@@ -111,7 +111,8 @@ RUN echo "export PATH=$PATH:/scripts:/home/toolkit/bin" | tee -a "/home/toolkit/
     echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc" && \
     echo 'ZSH_THEME="agnoster"' | tee -a "/home/toolkit/.zshrc" && \
     echo "export PATH=$PATH:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc" && \
-    echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc"
+    echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc" && \
+    echo "export LC_TYPE=en_GB.UTF-8" | tee -a "/home/toolkit/.zshrc"
 
 #EXPOSE 5000
 #ENV GOROOT /usr/local/bin/go

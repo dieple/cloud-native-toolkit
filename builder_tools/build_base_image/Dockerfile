@@ -48,7 +48,7 @@ RUN su - zshtest -c 'make test' || true
 FROM ubuntu:18.04
 WORKDIR /
 COPY --from=builder /tmp/zsh-install /
-
+COPY requirements*.txt /
 
 
 RUN apt-get update && \
@@ -80,6 +80,7 @@ RUN apt-get update && \
                        python-gobject \
                        libgirepository1.0-dev \
                        python3-pip \
+                       python3.7-venv \
                        vim \
                        git \
                        curl \
@@ -119,7 +120,8 @@ RUN cd /usr/local/bin && \
     ln -s python3.7 python3 && \
     ln -s python3.7 python && \
     pip3 install --upgrade pip && \
-    pip3 install mysql-connector
+    pip3 install mysql-connector && \
+    cd / && pip3 install -r /requirements-dev.txt
 
 # install kubectl
 RUN apt-get -y update && \
