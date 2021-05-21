@@ -40,11 +40,13 @@ done
 
 check_params
 
+
 # Modify to meet your env!
 # --terraformVersion=0.11.14 \
 python3 ./toolkit.py \
 	--terraformVersion=0.12.24 \
 	--installTerraform=true \
+	--cloudflareApiToken="$CLOUDFLARE_API_TOKEN" \
 	--shareHostVolume="$HOME/repos" \
 	--baseImageName="dieple/cloud-native-toolkit" \
 	--baseImageVersion="$BASE_IMAGE_VERSION" \

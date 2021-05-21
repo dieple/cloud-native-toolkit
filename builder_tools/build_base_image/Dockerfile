@@ -1,60 +1,16 @@
 ###############################################
 # Base image for local Development environment
 ###############################################
-#FROM ubuntu:18.04
-FROM bitnami/minideb-extras:stretch-buildpack AS builder
 
-
-#ENV SET_CONTAINER_TIMEZONE false
-ENV CONTAINER_TIMEZONE Europe/London
-ENV TERM=xterm-color
-ENV ZSH_THEME agnoster
-#ENV GOLANG_VERSION 1.13.5
-
-ARG ref=master
-WORKDIR /tmp/zsh-build
-RUN install_packages autoconf \
-                     libtool \
-                     libcap-dev \
-                     libtinfo5 \
-                     libncursesw5-dev \
-                     libpcre3-dev \
-                     libgdbm-dev \
-                     yodl \
-                     groff \
-                     man-db \
-                     texinfo \
-                     groff
-
-RUN curl -L https://api.github.com/repos/zsh-users/zsh/tarball/$ref | tar xz --strip=1
-RUN ./Util/preconfig
-RUN ./configure --prefix /usr \
-                --enable-pcre \
-                --enable-cap \
-                --enable-multibyte \
-                --with-term-lib='ncursesw tinfo' \
-                --with-tcsetpgrp
-RUN make
-RUN make -C Etc all FAQ FAQ.html
-RUN if test $ref = "master" ; then install_packages cm-super-minimal texlive-fonts-recommended texlive-latex-base texlive-latex-recommended ghostscript bsdmainutils ; fi
-RUN if test $ref = "master" ; then make -C Doc everything ; fi
-RUN make install DESTDIR=/tmp/zsh-install
-RUN make install.info DESTDIR=/tmp/zsh-install || true
-RUN yes '' | adduser --shell /bin/sh --home /tmp/zsh-build --disabled-login --disabled-password zshtest
-RUN chown -R zshtest /tmp/zsh-build
-RUN su - zshtest -c 'make test' || true
-
-#FROM bitnami/minideb:stretch
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 WORKDIR /
-COPY --from=builder /tmp/zsh-install /
 COPY requirements*.txt /
 
 
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:ubuntu-toolchain-r/ppa && \
-    apt-get install -y python3.7 && \
+    apt-get install -y python3.9 && \
     apt-get autoremove -y && \
     apt-get clean
 
@@ -80,10 +36,11 @@ RUN apt-get update && \
                        python-gobject \
                        libgirepository1.0-dev \
                        python3-pip \
-                       python3.7-venv \
+                       python3.9-venv \
                        vim \
                        git \
                        curl \
+                       zsh \
                        gcc \
                        g++ \
                        libssl-dev \
@@ -107,21 +64,20 @@ RUN apt-get update && \
                        grsync \
                        git-core \
                        gnupg \
-                       linuxbrew-wrapper \
                        locales \
-                       mysql-client
+                       mysql-client \
+                       iproute2 \
+                       net-tools \
+                       netcat
 
 RUN cd /usr/local/bin && \
-    ln -s /usr/bin/python3.7 python3 && \
-    ln -s /usr/bin/python3.7 python && \
     cd /usr/bin && \
-    unlink /usr/bin/python3 && \
-    unlink /usr/bin/python && \
-    ln -s python3.7 python3 && \
-    ln -s python3.7 python && \
     pip3 install --upgrade pip && \
     pip3 install mysql-connector && \
     cd / && pip3 install -r /requirements-dev.txt
+
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+RUN usermod -s $(which zsh) $(whoami)
 
 # install kubectl
 RUN apt-get -y update && \

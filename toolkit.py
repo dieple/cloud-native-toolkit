@@ -56,6 +56,9 @@ def process_arguments():
     required.add_argument('--baseImageVersion',
                           help='The toolkit base image version to use - e.g. 0.0.2',
                           required=True)
+
+    optional.add_argument('--cloudflareApiToken', help='Cloudflare API Token', required=False)
+
     optional.add_argument('--toolkitImageName', help='End result tookit Docker image name', default='toolkit')
     optional.add_argument('--baseImageName', help='Base Docker image name', default='dieple/toolkit')
     optional.add_argument('--ansibleVersion', help='Ansible version', default='2.8.3')
@@ -73,7 +76,7 @@ def process_arguments():
         gh_user = default_input("Env [GITHUB_USERNAME] not set - Enter github username", "dieple")
 
     if is_empty(gh_email):
-        gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "dieple1@gmail.com")
+        gh_email = default_input("Env [GITHUB_EMAIL] not set - Enter github Email", "diep@fifthrowtech.com")
 
     # print("DEBUG: gh_user {0}, gh_email {1}".format(gh_user, gh_email))
     optional.add_argument('--githubUsername', help='Github username', default="{0}".format(gh_user))
@@ -142,14 +145,16 @@ def create_dockerfile_from_template(args, dockerfile_template, output_dockerfile
 def build_docker_image(args, dockerfile):
     toolkit_image_name = "{0}:{1}".format(args.baseImageName, args.baseImageVersion)
     TFVersion = args.terraformVersion
+    dockerAppUser = "toolkit"
     print("TFVersion: {0}".format(TFVersion))
 
-    build_command = 'docker build --build-arg terraformVersion={0} \
-        --build-arg dockerAppUser={1} \
-        --build-arg sshKeyPassphrase={2} \
-        --build-arg sshKey="$(cat {5}/id_rsa)"  \
-        --build-arg sshKeyPub="$(cat {5}/id_rsa.pub)" \
-        --build-arg baseImageVersion={6} --rm -f {3} -t {4} .'.format(TFVersion, "toolkit", args.sshKeyPassphrase, dockerfile, toolkit_image_name, args.sshKeyDir, args.baseImageVersion)
+    build_command = f'docker build --build-arg terraformVersion={TFVersion} \
+        --build-arg dockerAppUser={dockerAppUser} \
+        --build-arg cloudflareApiToken={args.cloudflareApiToken} \
+        --build-arg sshKeyPassphrase={args.sshKeyPassphrase} \
+        --build-arg sshKey="$(cat {args.sshKeyDir}/id_rsa)"  \
+        --build-arg sshKeyPub="$(cat {args.sshKeyDir}/id_rsa.pub)" \
+        --build-arg baseImageVersion={args.baseImageVersion} --rm -f {dockerfile} -t {toolkit_image_name} .'
 
     logger.info("build_command: {0}".format(build_command))
     os.system(build_command)
@@ -161,7 +166,9 @@ def run_docker_image(args):
     toolkit_image_name = "{0}:{1}".format(args.baseImageName, args.baseImageVersion)
 
 
-    run_command = 'docker run -e "SET_CONTAINER_TIMEZONE=true" \
+    run_command = 'docker run --net=host \
+                        --add-host=host.docker.internal:host-gateway \
+                        -e "SET_CONTAINER_TIMEZONE=true" \
                         -e "CONTAINER_TIMEZONE=Europe/London" \
                         --interactive --tty -u {0} --rm \
                         --volume "{1}:/home/{0}/.kube" \

@@ -10,6 +10,7 @@ ARG terraformVersion=0.12.24
 ARG flyCLIVersion
 ARG sshKeyPassphrase
 ARG baseImageVersion
+ARG cloudflareApiToken
 
 FROM dieple/cloud-native-toolkit:${baseImageVersion}
 
@@ -25,6 +26,7 @@ ARG sshKeyPub
 ENV TERM xterm
 
 ENV TERRAFORM_VERSION=${terraformVersion}
+ENV CLOUDFLARE_API_TOKEN=${cloudflareApiToken}
 
 # Set this environment variable to true to set timezone on container start.
 ENV SET_CONTAINER_TIMEZONE false
@@ -106,10 +108,12 @@ ENV TERM=xterm-color
 #RUN echo '#override PS1' | tee -a "/home/toolkit/.zshrc"
 #RUN echo "export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\$ '" | tee -a "/home/toolkit/.zshrc"
 
+
 # Add to PATH variable.
 RUN echo "export PATH=$PATH:/scripts:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc" && \
     echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc" && \
     echo 'ZSH_THEME="agnoster"' | tee -a "/home/toolkit/.zshrc" && \
+    echo "export CLOUDFLARE_API_TOKEN=$cloudflareApiToken" | tee -a "/home/toolkit/.zshrc" && \
     echo "export PATH=$PATH:/home/toolkit/bin" | tee -a "/home/toolkit/.zshrc" && \
     echo "export TF_PLUGIN_CACHE_DIR=/home/toolkit/.terraform.d/plugin-cache" | tee -a "/home/toolkit/.zshrc" && \
     echo "export LC_TYPE=en_GB.UTF-8" | tee -a "/home/toolkit/.zshrc"
