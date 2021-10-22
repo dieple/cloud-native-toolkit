@@ -64,7 +64,7 @@ def process_arguments():
     optional.add_argument('--ansibleVersion', help='Ansible version', default='2.8.3')
     optional.add_argument("--installAnsible", type=str2bool, nargs='?', const=True, default=True, help="Install ansible?")
 
-    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.24')
+    optional.add_argument('--terraformVersion', help='Terraform version', default='0.12.31')
     optional.add_argument("--installTerraform", type=str2bool, nargs='?', const=True, default=True, help="Install Terraform?")
 
     optional.add_argument("--sshKeyDir", default="{0}/.ssh".format(home_dir), help="Host ssh directory")
@@ -144,11 +144,10 @@ def create_dockerfile_from_template(args, dockerfile_template, output_dockerfile
 
 def build_docker_image(args, dockerfile):
     toolkit_image_name = "{0}:{1}".format(args.baseImageName, args.baseImageVersion)
-    TFVersion = args.terraformVersion
     dockerAppUser = "toolkit"
-    print("TFVersion: {0}".format(TFVersion))
+    print("TFVersion: {0}".format(args.terraformVersion))
 
-    build_command = f'docker build --build-arg terraformVersion={TFVersion} \
+    build_command = f'docker build --build-arg terraformVersion={args.terraformVersion} \
         --build-arg dockerAppUser={dockerAppUser} \
         --build-arg cloudflareApiToken={args.cloudflareApiToken} \
         --build-arg sshKeyPassphrase={args.sshKeyPassphrase} \

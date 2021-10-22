@@ -43,8 +43,10 @@ check_params
 
 # Modify to meet your env!
 # --terraformVersion=0.11.14 \
+#	--terraformVersion=0.12.24 \
+#	--terraformVersion=0.12.31 \
 python3 ./toolkit.py \
-	--terraformVersion=0.12.24 \
+	--terraformVersion=1.0.9 \
 	--installTerraform=true \
 	--cloudflareApiToken="$CLOUDFLARE_API_TOKEN" \
 	--shareHostVolume="$HOME/repos" \

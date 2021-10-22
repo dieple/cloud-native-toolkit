@@ -6,7 +6,8 @@
 # templates/Dockerfile.template
 #################################################################
 #ARG profile
-ARG terraformVersion=0.12.24
+#ARG terraformVersion=0.12.31
+ARG terraformVersion
 ARG flyCLIVersion
 ARG sshKeyPassphrase
 ARG baseImageVersion
@@ -39,14 +40,15 @@ RUN echo "root:toolkit" |chpasswd && \
     useradd -ms /bin/zsh -G sudo toolkit && \
     echo "toolkit:toolkit" |chpasswd
 
+
 # Not too sure why ${terraformVersion} is null !!!
 #wget -q https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip && \
-###INSTALL_TERRAFORM###RUN cd /tmp && \
-    wget -q https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip && \
-    unzip terraform_0.12.24_linux_amd64.zip -d /usr/local/bin && \
-    rm -rf /tmp/* && \
-    rm -rf /var/cache/apk/* && \
-    rm -rf /var/tmp/*
+###INSTALL1_TERRAFORM###RUN cd /tmp && \
+#    wget -q https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip && \
+#    unzip terraform_0.12.31_linux_amd64.zip -d /usr/local/bin && \
+#    rm -rf /tmp/* && \
+#    rm -rf /var/cache/apk/* && \
+#    rm -rf /var/tmp/*
 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && ./aws/install && rm awscliv2.zip
@@ -138,6 +140,14 @@ USER toolkit
 # installing “agnoster” Oh My ZSH theme
 #RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 #RUN git clone https://github.com/powerline/fonts.git /tmp/.fonts && cd /tmp/.fonts && ./install.sh
+
+# install tfenv
+RUN git clone https://github.com/tfutils/tfenv.git ~/.tfenv && \
+    echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> /home/toolkit/.zshrc
+
+#RUN /home/toolkit/.tfenv/bin/tfenv install 0.12.31 && /home/toolkit/.tfenv/bin/tfenv install 1.0.9
+# see https://opensource.com/article/20/11/tfenv for usage
+
 
 WORKDIR /repos
 
