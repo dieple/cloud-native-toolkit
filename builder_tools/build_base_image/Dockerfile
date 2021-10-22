@@ -89,29 +89,28 @@ RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/a
 
 # wget -q https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
 #curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz | tar -C /usr/local/bin -xz && \
-RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh && bash nodesource_setup.sh && \
+RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash - && \
     apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
-    curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 | tee /usr/local/bin/json2hcl > /dev/null && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs  && \
+    curl -SsL https://github.com/kvz/json2hcl/releases/download/v0.0.6/json2hcl_v0.0.6_linux_amd64 | tee /usr/local/bin/json2hcl > /dev/null  && \
     chmod 755 /usr/local/bin/json2hcl && \
     curl -sL -o /usr/local/bin/yaml2json https://github.com/wakeful/yaml2json/releases/download/0.3.1/yaml2json-linux-amd64 && \
     chmod +x /usr/local/bin/yaml2json && \
     curl -sL -o /usr/local/bin/jq  https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
-    chmod +x /usr/local/bin/jq && \
-    curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
-    mv /tmp/eksctl /usr/local/bin/ && \
-    curl -sL -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.12.6/bin/linux/amd64/kubectl && \
+    chmod +x /usr/local/bin/jq  && \
+    curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
+    mv /tmp/eksctl /usr/local/bin/  && \
+    curl -sL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     chmod +x /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/eksctl && \
-    curl -sL -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.12.7/2019-03-27/bin/linux/amd64/aws-iam-authenticator && \
+    curl -sL -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator && \
     chmod +x /usr/local/bin/aws-iam-authenticator && \
-    wget -q https://get.helm.sh/helm-v3.0.3-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm  && \
-    chmod +x /usr/local/bin/helm && \
-    wget -q https://github.com/derailed/k9s/releases/download/0.7.13/k9s_0.7.13_Linux_x86_64.tar.gz -O - | tar -xzO k9s > /usr/local/bin/k9s  && \
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sudo -E bash - && \
+    wget -q https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz -O - | tar -xzO k9s > /usr/local/bin/k9s  && \
     chmod +x /usr/local/bin/k9s && \
     curl -sL -o /usr/local/bin/assume-role https://raw.githubusercontent.com/coinbase/assume-role/master/assume-role && \
     chmod +x /usr/local/bin/assume-role && \
-    wget -q https://github.com/junegunn/fzf-bin/releases/download/0.20.0/fzf-0.20.0-linux_amd64.tgz -O - | tar -xzO fzf > /usr/local/bin/fzf  && \
+    wget -q https://github.com/junegunn/fzf/releases/download/0.27.3/fzf-0.27.3-linux_amd64.tar.gz -O - | tar -xzO fzf > /usr/local/bin/fzf  && \
     chmod +x /usr/local/bin/fzf && \
     curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64 && \
     install skaffold /usr/local/bin/ && \
@@ -131,4 +130,5 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh && bas
 
 #RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | zsh || true
 #RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+RUN ln -s /usr/bin/python3 /usr/bin/python
 CMD ["/usr/bin/zsh","-l"]
