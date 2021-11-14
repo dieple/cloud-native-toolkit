@@ -108,7 +108,7 @@ RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash - && \
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sudo -E bash - && \
     wget -q https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz -O - | tar -xzO k9s > /usr/local/bin/k9s  && \
     chmod +x /usr/local/bin/k9s && \
-    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash && \
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash &&  mv kustomize /usr/local/bin/ && \
     curl -sL -o /usr/local/bin/assume-role https://raw.githubusercontent.com/coinbase/assume-role/master/assume-role && \
     chmod +x /usr/local/bin/assume-role && \
     wget -q https://github.com/junegunn/fzf/releases/download/0.27.3/fzf-0.27.3-linux_amd64.tar.gz -O - | tar -xzO fzf > /usr/local/bin/fzf  && \

@@ -55,7 +55,7 @@ done
 
 check_params
 
-docker build -t ${USERID}/cloud-native-toolkit:${VERSION} .
+docker build --no-cache --pull -t ${USERID}/cloud-native-toolkit:${VERSION} .
 docker tag ${USERID}/cloud-native-toolkit:${VERSION} ${USERID}/cloud-native-toolkit:latest
 
 if [[ x"$PUSH" = x"TRUE" ]]; then
