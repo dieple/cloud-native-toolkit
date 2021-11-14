@@ -3,3 +3,5 @@ Dockerfile
 entry.sh
 pip_packages
 toolkits/__pycache__
+
+!builder_tools/build_base_image/Dockerfile
