@@ -65,10 +65,13 @@ RUN /scripts/ntp.sh && \
 
 WORKDIR /scripts/packages
 
+
 RUN pip install setuptools && \
-	pip freeze && \
 	pip install git+https://github.com/virtuald/pyhcl.git@0.3.12#egg=pyhcl && \
 	pip install -r pip_packages && \
+  pip uninstall ansible ansible-core -y && \
+  pip install ansible==2.9.26 && \
+	pip freeze && \
 	pip install ./secrets && \
 	pip install ./render-templates && \
 	pip install ./pgbackup && \
