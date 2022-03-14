@@ -39,7 +39,6 @@ RUN apt-get update && \
                        python3.9-venv \
                        vim \
                        git \
-                       curl \
                        zsh \
                        gcc \
                        g++ \
@@ -68,13 +67,19 @@ RUN apt-get update && \
                        mysql-client \
                        iproute2 \
                        net-tools \
-                       netcat
+                       netcat \
+                       curl \
+                       packer
+
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
+  apt-add-repository -y "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 
 RUN cd /usr/local/bin && \
     cd /usr/bin && \
     pip3 install --upgrade pip && \
     pip3 install mysql-connector && \
     cd / && pip3 install -r /requirements-dev.txt
+
 
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 RUN usermod -s $(which zsh) $(whoami)

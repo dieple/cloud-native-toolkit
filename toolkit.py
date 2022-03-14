@@ -69,6 +69,7 @@ def process_arguments():
 
     optional.add_argument("--sshKeyDir", default="{0}/.ssh".format(home_dir), help="Host ssh directory")
     optional.add_argument("--awsConfigDir", default="{0}/.aws".format(home_dir), help="AWS config directory")
+    optional.add_argument("--gitConfig", default="{0}/.gitconfig".format(home_dir), help="Git config")
     optional.add_argument("--kubeConfigDir", default="{0}/.kube".format(home_dir), help="Kubectl config directory")
     optional.add_argument("--sshKeyPassphrase", default="", help="ssh pass phrase")
 
@@ -161,8 +162,10 @@ def build_docker_image(args, dockerfile):
 
 def run_docker_image(args):
 
+    tf_plugins_dir = "{0}/.terraform.d/plugins".format(home_dir)
     tf_cache_plugins_dir = "{0}/.terraform.d/plugin-cache".format(home_dir)
     toolkit_image_name = "{0}:{1}".format(args.baseImageName, args.baseImageVersion)
+    dot_ansible_dir = "{0}/.ansible".format(home_dir)
 
 
     run_command = 'docker run --net=host \
@@ -175,9 +178,13 @@ def run_docker_image(args):
                         --volume "{3}:/home/{0}/.aws" \
                         --volume "{4}:/repos" \
                         --volume "{5}:/home/{0}/.terraform.d/plugin-cache" \
-                        {6} /usr/bin/zsh'.format("toolkit", args.kubeConfigDir, args.sshKeyDir, \
+                        --volume "{6}:/home/{0}/.gitconfig" \
+                        --volume "{7}:/home/{0}/.terraform.d/plugins" \
+                        --volume "{8}:/home/{0}/.ansible" \
+                        {9} /usr/bin/zsh'.format("toolkit", args.kubeConfigDir, args.sshKeyDir, \
                                               args.awsConfigDir, args.shareHostVolume, \
-                                              tf_cache_plugins_dir, toolkit_image_name)
+                                              tf_cache_plugins_dir, args.gitConfig, tf_plugins_dir, dot_ansible_dir, \
+                                              toolkit_image_name)
 
     logger.info("run_command: {0}".format(run_command))
     os.system(run_command)
