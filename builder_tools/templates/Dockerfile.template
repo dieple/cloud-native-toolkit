@@ -71,6 +71,7 @@ RUN pip install setuptools && \
 	pip install -r pip_packages && \
   pip uninstall ansible ansible-core -y && \
   pip install ansible==2.9.26 && \
+  pip install configobj && \
 	pip freeze && \
 	pip install ./secrets && \
 	pip install ./render-templates && \
