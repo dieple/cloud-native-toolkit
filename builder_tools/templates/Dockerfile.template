@@ -103,6 +103,7 @@ ADD ./builder_tools/templates/vimrc "/home/toolkit/.vimrc"
 
 RUN echo 'source <(kubectl completion zsh)' | tee -a "/home/toolkit/.zshrc" && \
     echo 'alias k=kubectl' | tee -a "/home/toolkit/.zshrc" && \
+    echo 'alias kubectl=kubecolor' | tee -a "/home/toolkit/.zshrc" && \
     echo 'alias k9s="export TERM=xterm && k9s"' | tee -a "/home/toolkit/.zshrc"
 
 # Set the vault profile in the environment for assume-role scripts.
