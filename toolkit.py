@@ -172,6 +172,7 @@ def run_docker_image(args):
                         --add-host=host.docker.internal:host-gateway \
                         -e "SET_CONTAINER_TIMEZONE=true" \
                         -e "CONTAINER_TIMEZONE=Europe/London" \
+                        --memory=10g --memory-swap=-1 \
                         --interactive --tty -u {0} --rm \
                         --volume "{1}:/home/{0}/.kube" \
                         --volume "{2}:/home/{0}/.ssh" \
